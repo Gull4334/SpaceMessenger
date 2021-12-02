@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+
+      match /channels/{channelId} {
+        allow read;
+
+        match /messages/{messageId} {
+          allow read;
+
+          function isValidUser(id, name, avatar) {
+            return (
+              (id == "gary" && name == "Captain Gary" && avatar == "https://spacebook-messenger.web.app/avatars/gary.png") ||
+              (id == "hue" && name == "H.U.E." && avatar == "https://spacebook-messenger.web.app/avatars/hue.png") ||
+              (id == "quinn" && name == "Quinn Ergon" && avatar == "https://spacebook-messenger.web.app/avatars/quinn.png") ||
+              (id == "kvn" && name == "KVN" && avatar == "https://spacebook-messenger.web.app/avatars/kvn.png") ||
+              (id == "mooncake" && name == "Mooncake" && avatar == "https://spacebook-messenger.web.app/avatars/mooncake.png") ||
+              (id == "avocato" && name == "Avocato" && avatar == "https://spacebook-messenger.web.app/avatars/avocato.png")
+            );
+          }
+
+          function messageDataIsValid(data) {
+            return (
+              "text" in data && data.text is string &&
+              "sentAt" in data && data.sentAt is timestamp &&
+              "senderId" in data &&
+              "senderAvatar" in data &&
+              "senderName" in data &&
+              isValidUser(data.senderId, data.senderName, data.senderAvatar)
+            );
+          }
+
+          allow create: if channelId != "task1Channel" &&
+            messageDataIsValid(request.resource.data) &&
+            exists(/databases/$(database)/documents/channels/$(channelId))
+        }
+      }
+    }
+  }
+}

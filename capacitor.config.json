@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "Spacebook Messenger",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
